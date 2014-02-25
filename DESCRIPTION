@@ -1,0 +1,10 @@
+Package: ggplotly
+Maintainer: Toby Dylan Hocking <tdhock5@gmail.com>
+Author: Toby Dylan Hocking
+Version: 2014.2.25
+License: GPL-3
+Title: Export ggplots to plot.ly
+Description: ggplots can be used to define plots in R,
+ which can be exported for interactivity viewing on plot.ly
+ using the plotly package.
+Depends: plotly
