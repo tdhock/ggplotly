@@ -20,6 +20,13 @@ pch2symbol <- c("0"="square",
                 "O"="circle",
                 "+"="cross")
 
+ggplotly <- function(gg, p){
+  pargs <- gg2list(gg)
+  resp <- do.call(p$plotly, pargs)
+  browseURL(resp$url)
+  list(data=pargs, response=response)
+}
+
 #' Convert ggplot2 aes to plotly "marker" codes.
 aes2marker <- c(alpha="opacity",
                 pch="symbol",
@@ -341,7 +348,10 @@ layer2list <- function(l, d, ranges){
     tr$marker[[plotly.name]] <- take.from[[name]]
   }
   g$trace <- tr
-  g
+  
+  pargs <- lapply(g$geoms, "[[", "trace")
+  pargs$kwargs <- list()
+  pargs
 }
 
 #' Get legend information.
