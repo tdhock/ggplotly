@@ -3,37 +3,59 @@ library(ggplot2)
 
 #' Generate data
 set.seed(1)
-Groups <- data.frame(x=rep(1:10, times=5), group = rep(1:5, each=10))
+n.groups <- 20
+Groups <- data.frame(x=rep(1:10, times=n.groups),
+                     group = rep(1:n.groups, each=10))
 Groups$lt <- c("even", "odd")[(Groups$group%%2+1)] # linetype
 Groups$group <- as.factor(Groups$group)
-Groups$y <- rnorm(length(Groups$x), Groups$x, .5) + rep(rnorm(5, 0, 2), each=10)
+Groups$y <- rnorm(length(Groups$x), Groups$x, .5) +
+  rep(rnorm(n.groups, 0, 2), each=10)
 
 
 #' Simple line plot
-FiveBlack <- ggplot() +
-  geom_line(data=data, aes(x=x, y=y, group=group)) + 
+AllBlack <- ggplot(Groups) +
+  geom_line(aes(x=x, y=y, group=group)) + 
   ggtitle("geom_line")
-ggplotly(FiveBlack, p)
+ggplotly(AllBlack, p)
 
 
 #' Simple line plot with colors...
-FiveColor <- ggplot() +
-  geom_line(data=data, aes(x=x, y=y, colour=group, group=group)) +
+AllColors <- ggplot(Groups) +
+  geom_line(aes(x=x, y=y, colour=group, group=group)) +
   ggtitle("geom_line + scale_colour_discrete")
-ggplotly(FiveColor, p)
+## TODO: set plot title.
+ggplotly(AllColors, p)
 ## TODO: set trace text with name parameter.
 
 #' Simple line plot with colors and linetype
-p3 <- ggplot() + geom_line(data=data, aes(x=x, y=y, colour=group, group=group, linetype=lt)) +
+ColorsTwoTypes <- ggplot(Groups) +
+  geom_line(aes(x=x, y=y, colour=group, group=group, linetype=lt)) +
   ggtitle("geom_line + scale_linetype_manual")
-p3
-# gg2animint(list(p1=p1, p2=p2, p3=p3))
+ggplotly(ColorsTwoTypes, p)
+
 
 #' Use automatic linetypes from ggplot with coerced factors
-p4 <- ggplot() + geom_line(data=data, aes(x=x, y=y, colour=group, group=group, linetype=group)) +
+Types <- ggplot(Groups) +
+  geom_line(aes(x=x, y=y, colour=group, group=group,linetype=group))+
   ggtitle("geom_line + scale_linetype automatic")
-p4
-# gg2animint(list(p1=p1, p2=p2, p3=p3, p4=p4))
+Types
+
+#' Use automatic linetypes from ggplot with coerced factors
+makedf <- function(plotly){
+  data.frame(plotly, ggplot2=names(plotly))
+}
+dash.data <- makedf(named.lty)
+NamedTypes <- ggplot(dash.data) +
+  geom_segment(aes(-1, ggplot2, xend=1, yend=ggplot2, linetype=ggplot2))+
+  ggtitle("geom_line + scale_linetype_identity")+
+  scale_linetype_identity()+
+  geom_text(aes(0, ggplot2, label=plotly))
+## TODO: implement traces for geom_segment.
+ggplotly(NamedTypes, p)
+
+## TODO: S3 methods for converting geoms to traces.
+
+## TODO: more test linetype plots.
 
 #' Manually specify linetypes using <length, space, length, space...> notation
 data$lt <- rep(c("2423", "2415", "331323", "F2F4", "solid"), each=10)

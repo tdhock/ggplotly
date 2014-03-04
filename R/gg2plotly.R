@@ -49,13 +49,37 @@ aes2line <- c(linetype="dash",
               colour="color",
               size="width")
 
+numeric.lty <-
+  c("1"="solid",
+    "2"="dash",
+    "3"="dot",
+    "4"="dashdot",
+    "5"="longdash",
+    "6"="longdashdot")
+named.lty <-
+  c("solid"="solid",
+    "blank"="none",
+    "dashed"="dash",
+    "dotted"="dotted",
+    "dotdash"="dashdot",
+    "longdash"="longdash",
+    "twodash"="dash")
+coded.lty <-
+  c("22"="dash",
+    "42"="dash",
+    "44"="dash",
+    "13"="dot",
+    "1343"="dotdash",
+    "73"="dash",
+    "2262"="dotdash",
+    "12223242"="dotdash",
+    "F282"="dash",
+    "F4448444"="dash",
+    "224282F2"="dash",
+    "F1"="dash")
+
 #' Convert R lty line type codes to plotly "dash" codes.
-lty2dash <- c("1"="solid",
-              "2"="dash",
-              "3"="dot",
-              "4"="dashdot",
-              "5"="longdash",
-              "6"="longdashdot")
+lty2dash <- c(numeric.lty, named.lty, coded.lty)
 
 #' Convert a ggplot to a list.
 #' @param p ggplot2 plot.
@@ -318,7 +342,7 @@ layer2list <- function(l, d, ranges){
       if(!"size"%in%names(g$data)) g$data[["size"]] <- 0 
     }
     "polygon"
-  } else if(geom("polygon", "line")) {
+  } else if(geom("polygon", "line", "segment")) {
     ## all other geoms are basic, and keep the same name.
     g$geom
   } else {
