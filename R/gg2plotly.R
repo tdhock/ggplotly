@@ -1,3 +1,19 @@
+#' Send a ggplot to plot.ly.
+#' @param gg a ggplot.
+#' @param p a plotly interface object.
+ggplotly <- function(gg, p){
+  if(!is.ggplot(gg)){
+    stop("gg must be a ggplot")
+  }
+  if(!is.function(p$plotly)){
+    stop("p must be a plotly interface object")
+  }
+  pargs <- gg2list(gg)
+  resp <- do.call(p$plotly, pargs)
+  browseURL(resp$url)
+  list(data=pargs, response=resp)
+}
+
 #' Convert R pch point codes to plotly "symbol" codes.
 pch2symbol <- c("0"="square",
                 "1"="circle",
@@ -20,29 +36,26 @@ pch2symbol <- c("0"="square",
                 "O"="circle",
                 "+"="cross")
 
-ggplotly <- function(gg, p){
-  pargs <- gg2list(gg)
-  resp <- do.call(p$plotly, pargs)
-  browseURL(resp$url)
-  list(data=pargs, response=response)
-}
-
 #' Convert ggplot2 aes to plotly "marker" codes.
 aes2marker <- c(alpha="opacity",
                 pch="symbol",
-                size="size",
                 colour="color",
-                TODO="line", ## line color, size, and dash
-                linetype="dash",
+                size="size",
+                ##TODO="line", ## line color, size, and dash
                 shape="symbol")
 
+#' Convert ggplot2 aes to line parameters.
+aes2line <- c(linetype="dash",
+              colour="color",
+              size="width")
+
 #' Convert R lty line type codes to plotly "dash" codes.
-lty2dash <- c("solid",
-              "dot",
-              "dash",
-              "longdash",
-              "dashdot",
-              "longdashdot")
+lty2dash <- c("1"="solid",
+              "2"="dash",
+              "3"="dot",
+              "4"="dashdot",
+              "5"="longdash",
+              "6"="longdashdot")
 
 #' Convert a ggplot to a list.
 #' @param p ggplot2 plot.
@@ -148,8 +161,13 @@ gg2list <- function(p){
   } else {
     plist$title <- plistextra$plot$labels$title
   }
-  
-  plist
+
+  pargs <- list()
+  for(g in plist$geoms){
+    pargs <- c(pargs, g$traces)
+  }
+  pargs$kwargs <- list()
+  pargs
 }
 
 #' Convert a layer to a list. Called from gg2list()
@@ -189,8 +207,9 @@ layer2list <- function(l, d, ranges){
   ## symbol=circle,square,diamond,cross,x,
   ## triangle-up,triangle-down,triangle-left,triangle-right
 
-  geom <- function(gname){
-    g$geom == gname
+  geom <- function(...){
+    gnames <- c(...)
+    g$geom %in% gnames
   }
   g$geom <- if(geom("abline")){
     # "Trick" ggplot coord_transform into transforming the slope and intercept
@@ -210,6 +229,7 @@ layer2list <- function(l, d, ranges){
     } 
     "segment"
   } else if(geom("point")){
+    g$data$group <- 1
     # Fill set to match ggplot2 default of filled in circle. 
     if(!"fill"%in%names(g$data) & "colour"%in%names(g$data)){
       g$data[["fill"]] <- g$data[["colour"]]
@@ -298,7 +318,7 @@ layer2list <- function(l, d, ranges){
       if(!"size"%in%names(g$data)) g$data[["size"]] <- 0 
     }
     "polygon"
-  } else if(g$geom %in% c("polygon")) {
+  } else if(geom("polygon", "line")) {
     ## all other geoms are basic, and keep the same name.
     g$geom
   } else {
@@ -308,9 +328,11 @@ layer2list <- function(l, d, ranges){
   ## For ggplot2 polygons, change convert groups to vectors with NA.
   if(geom("polygon")){
     poly.list <- split(g$data, g$data$group)
+    is.group <- names(g$data) == "group"
     poly.na.df <- data.frame()
     for(i in seq_along(poly.list)){
-      poly.na.df <- rbind(poly.na.df, poly.list[[i]], NA)
+      no.group <- poly.list[[i]][,!is.group,drop=FALSE]
+      poly.na.df <- rbind(poly.na.df, no.group, NA)
     }
     g$data <- poly.na.df
   }
@@ -327,33 +349,63 @@ layer2list <- function(l, d, ranges){
     warning(sprintf("geom_%s with size=0 will be invisible",g$geom))
   }
 
-  tr <- list()
-  for(name in c("x", "y", "text")){
-    if(name %in% names(g$data)){
-      tr[[name]] <- g$data[[name]]
-    }
+  g$traces <- list()
+  n.groups <- length(unique(g$data$group))
+  group.list <- if(n.groups){
+    split(g$data, g$data$group)
+  }else{
+    list(g$data)
   }
-  ## Add plotly type/mode info based on geom type.
-  if(geom("point")){
-    tr$type <- "scatter"
-    tr$mode <- "markers"
+  for(group.i in seq_along(group.list)){
+    g$traces[[group.i]] <- group2trace(group.list[[group.i]], g$params, g$geom)
   }
-  for(name in names(aes2marker)){
-    plotly.name <- aes2marker[[name]]
-    take.from <- if(name %in% g$params){
-      g$params
-    } else if(name %in% names(g$data)){
-      g$data
-    }
-    tr$marker[[plotly.name]] <- take.from[[name]]
-  }
-  g$trace <- tr
-  
-  pargs <- lapply(g$geoms, "[[", "trace")
-  pargs$kwargs <- list()
-  pargs
+  g
 }
 
+getMarker <- function(df, params, aesConverter, only=NULL){
+  marker <- list()
+  for(name in names(aesConverter)){
+    plotly.name <- aesConverter[[name]]
+    take.from <- if(name %in% params){
+      params
+    } else if(name %in% names(df)){
+      df
+    } #else it will be NULL.
+    to.write <- take.from[[name]]
+    marker[[plotly.name]] <- if(!is.null(only)){
+      to.write[only]
+    }else{
+      to.write
+    }
+  }
+  marker
+}
+
+##' Convert 1 ggplot2 group to 1 plotly trace.
+##' @param gl 
+##' @return a list to be passed to plotly().
+##' @author Toby Dylan Hocking
+group2trace <- function(df, params, geom){
+  ## Add plotly type/mode info based on geom type.
+  if(geom == "point"){
+    tr <- list(type="scatter",
+               mode="markers",
+               marker=getMarker(df, params, aes2marker))
+  }else if(geom %in% c("line", "polygon")){
+    tr <- list(type="scatter",
+               mode="lines",
+               marker=list(line=getMarker(df, params, aes2line, 1)))
+  }else{
+    stop("group2trace does not support geom ", geom)
+  }
+  ## Copy data to output trace
+  for(name in c("x", "y", "text")){
+    if(name %in% names(df)){
+      tr[[name]] <- df[[name]]
+    }
+  }
+  tr
+}
 #' Get legend information.
 #' @param plistextra output from ggplot2::ggplot_build(p)
 #' @return list containing information for each legend
