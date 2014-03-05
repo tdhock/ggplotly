@@ -22,9 +22,15 @@ check.named <- function(expected, generated){
         bad()
       }
       check.named(e, g)
-    }
-    if(any(e != g)){
-      bad()
+    }else if(is.atomic(e)){
+      if(!is.atomic(g) ||
+         length(g) != length(e) ||
+         any(e != g)){
+        bad()
+      }
+    }else{
+      print(e)
+      stop("do not know what to do with this expectation")
     }
   }
 }
@@ -47,12 +53,15 @@ group.list <- split(Groups, Groups$group)
 expected <- list()
 for(group.i in seq_along(group.list)){
   g <- group.list[[group.i]]
-  expected[[group.i]] <- list(x=g$x, y=g$y, type="scatter", mode="lines")
+  expected[[group.i]] <- list(x=g$x, y=g$y, type="scatter", mode="lines",
+                              marker=list(color="black"))
 }
 to.check <- list(check(AllBlack, expected))
 for(L in to.check){
   generated <- gg2list(L$gg)
   for(trace.i in seq_along(expected)){
-    check.named(L$exp[[trace.i]], generated[[trace.i]])
+    e <- L$exp[[trace.i]]
+    g <- generated[[trace.i]]
+    check.named(e, g)
   }
 }

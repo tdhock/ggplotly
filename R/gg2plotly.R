@@ -43,11 +43,17 @@ aes2marker <- c(alpha="opacity",
                 size="size",
                 ##TODO="line", ## line color, size, and dash
                 shape="symbol")
-
+marker.defaults <- c(alpha=1,
+                     shape="o",
+                     colour="black",
+                     size=5)
 #' Convert ggplot2 aes to line parameters.
 aes2line <- c(linetype="dash",
               colour="color",
               size="width")
+line.defaults <- c(linetype="solid",
+                   colour="black",
+                   size=2)
 
 numeric.lty <-
   c("1"="solid",
@@ -386,7 +392,7 @@ layer2list <- function(l, d, ranges){
   g
 }
 
-getMarker <- function(df, params, aesConverter, only=NULL){
+getMarker <- function(df, params, aesConverter, defaults, only=NULL){
   marker <- list()
   for(name in names(aesConverter)){
     plotly.name <- aesConverter[[name]]
@@ -394,8 +400,13 @@ getMarker <- function(df, params, aesConverter, only=NULL){
       params
     } else if(name %in% names(df)){
       df
-    } #else it will be NULL.
+    } else {
+      defaults
+    }
     to.write <- take.from[[name]]
+    if(is.null(to.write)){
+      stop("undefined marker ", name)
+    }
     marker[[plotly.name]] <- if(!is.null(only)){
       to.write[only]
     }else{
@@ -412,13 +423,15 @@ getMarker <- function(df, params, aesConverter, only=NULL){
 group2trace <- function(df, params, geom){
   ## Add plotly type/mode info based on geom type.
   if(geom == "point"){
+    marker <- getMarker(df, params, aes2marker, marker.defaults)
     tr <- list(type="scatter",
                mode="markers",
-               marker=getMarker(df, params, aes2marker))
+               marker=marker)
   }else if(geom %in% c("line", "polygon")){
+    marker <- getMarker(df, params, aes2line, line.defaults, 1)
     tr <- list(type="scatter",
                mode="lines",
-               marker=list(line=getMarker(df, params, aes2line, 1)))
+               marker=list(line=marker))
   }else{
     stop("group2trace does not support geom ", geom)
   }
