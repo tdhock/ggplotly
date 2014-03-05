@@ -7,6 +7,7 @@ Title: Export ggplots to plot.ly
 Description: ggplots can be used to define plots in R,
     which can be exported for interactivity viewing on plot.ly
     using the plotly package.
+Depends:
+    ggplot2
 Imports:
-    ggplot2,
     plotly
