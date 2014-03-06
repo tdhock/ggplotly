@@ -1,4 +1,5 @@
 #' Send a ggplot to plot.ly.
+#' @export
 #' @param gg a ggplot.
 #' @param p a plotly interface object.
 ggplotly <- function(gg, p){
@@ -82,6 +83,7 @@ coded.lty <-
 lty2dash <- c(numeric.lty, named.lty, coded.lty)
 
 #' Convert a ggplot to a list.
+#' @import ggplot2 plotly
 #' @param p ggplot2 plot.
 #' @return list representing a ggplot.
 #' @export
