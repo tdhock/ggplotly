@@ -1,3 +1,4 @@
+library(ggplotly)
 check <- function(gg, expected){
   list(ggplot=gg, expected=expected)
 }
@@ -54,7 +55,7 @@ expected <- list()
 for(group.i in seq_along(group.list)){
   g <- group.list[[group.i]]
   expected[[group.i]] <- list(x=g$x, y=g$y, type="scatter", mode="lines",
-                              marker=list(color="black"))
+                              marker=list(line=list(color="black")))
 }
 to.check <- list(check(AllBlack, expected))
 for(L in to.check){

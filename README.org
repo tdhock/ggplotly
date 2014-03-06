@@ -1,0 +1,56 @@
+* Motivation
+
+A wide variety of plots can be defined in R code using
+library(ggplot2). The [[https://plot.ly][plot.ly]] web app is for interactively sharing
+plots, and can be used from R via library(plotly). Now, ggplots can be
+uploaded to plotly using library(ggplotly).
+
+#+BEGIN_SRC R
+install.packages("devtools")
+library(devtools)
+install_github("ggplotly", "tdhock")
+library(ggplotly)
+example(ggplotly)
+#+END_SRC
+
+* Features
+
+The mission of the ggplotly package is to make it as easy as possible
+to go from a ggplot on your computer to an interactive, sharable plot
+on plot.ly. We would like to support all plots shown on the [[http://docs.ggplot2.org][ggplot2
+documentation web site]], except for those which are known (as of 6
+March 2014) to be unsupported by plot.ly:
+
+- contours
+- violin plots
+- horizontal error bars
+- hexagon binning
+- geom crossbar
+
+The [[file:NEWS][NEWS]] file contains a list of TODOs that we will eventually
+implement. If you have a feature request that does not appear on that
+list, feel free to file an issue or pull request.
+
+* Development
+
+Contributions are welcome! After forking and changing the code, please
+
+- add some relevant tests, 
+- change the Version line in the DESCRIPTION file to the current date, 
+- describe your changes in the NEWS file, 
+
+and finally re-build the package and make sure =R CMD check= shows no
+errors nor warnings. In R:
+
+#+BEGIN_SRC R
+install.packages("roxygen2")
+library(roxygen2)
+roxygenize("ggplotly")
+#+END_SRC
+
+Then in the shell:
+
+#+BEGIN_SRC shell-script
+R CMD build ggplotly
+R CMD check ggplotly_xx.yy.zz.tar.gz
+#+END_SRC

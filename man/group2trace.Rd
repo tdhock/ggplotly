@@ -5,7 +5,11 @@
 group2trace(df, params, geom)
 }
 \arguments{
-  \item{gl}{}
+  \item{df}{data.frame.}
+
+  \item{params}{list of defaults.}
+
+  \item{geom}{length 1 character.}
 }
 \value{
 a list to be passed to plotly().

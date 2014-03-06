@@ -419,7 +419,9 @@ getMarker <- function(df, params, aesConverter, defaults, only=NULL){
 }
 
 ##' Convert 1 ggplot2 group to 1 plotly trace.
-##' @param gl 
+##' @param df data.frame.
+##' @param params list of defaults.
+##' @param geom length 1 character.
 ##' @return a list to be passed to plotly().
 ##' @author Toby Dylan Hocking
 group2trace <- function(df, params, geom){
