@@ -1,0 +1,7 @@
+export(getLegendList)
+export(gg2list)
+export(ggplotly)
+export(layer2list)
+export(toRGB)
+import(ggplot2)
+import(plotly)
