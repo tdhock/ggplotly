@@ -222,7 +222,9 @@ layer2list <- function(l, d, ranges){
   ## use un-named parameters so that they will not be exported
   ## to JSON as a named object, since that causes problems with
   ## e.g. colour.
-  g$params <- l$geom_params
+  g$params <- c(l$geom_params, l$stat_params)
+  ## non-ggplot2 params like name are useful for plot.ly and ggplot2
+  ## places them into stat_params.
   for(p.name in names(g$params)){
     names(g$params[[p.name]]) <- NULL
   }
@@ -447,10 +449,13 @@ group2trace <- function(df, params, geom){
     stop("group2trace does not support geom ", geom)
   }
   ## Copy data to output trace
-  for(name in c("x", "y", "text")){
-    if(name %in% names(df)){
-      tr[[name]] <- df[[name]]
+  for(name in c("x", "y", "text", "name")){
+    take.from <- if(name %in% names(df)){
+      df
+    }else if(name %in% names(params)){
+      params
     }
+    tr[[name]] <- take.from[[name]]
   }
   tr
 }

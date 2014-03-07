@@ -1,8 +1,9 @@
 library(ggplotly)
 check <- function(gg, expected){
-  list(ggplot=gg, expected=expected)
+  m <- match.call()
+  list(ggplot=gg, expected=expected, name = as.character(m$gg))
 }
-check.named <- function(expected, generated){
+check.named <- function(expected, generated, trace){
   for(L in list(expected, generated)){
     stopifnot(is.list(L))
     stopifnot(!is.null(names(L)))
@@ -12,17 +13,21 @@ check.named <- function(expected, generated){
     }
   }
   for(name in names(expected)){
+    this.trace <- c(trace, name)
     e <- expected[[name]]
     g <- generated[[name]]
-    bad <- function(){
-      print(list(expected=e, generated=g))
-      stop("did not generate what we expected")
+    bad <- function(msg="did not generate what we expected"){
+      if(missing(msg)){
+        print(list(expected=e, generated=g))
+      }
+      print(this.trace)
+      stop(msg)
     }
     if(is.list(e)){
       if(!is.list(g)){
         bad()
       }
-      check.named(e, g)
+      check.named(e, g, this.trace)
     }else if(is.atomic(e)){
       if(!is.atomic(g) || length(g) != length(e)) {
         bad()
@@ -38,7 +43,7 @@ check.named <- function(expected, generated){
         if(is.character(char.if.different)){
           print(rbind(expected=e, generated=g))
           print(char.if.different)
-          stop("not numerically equal")
+          bad("not numerically equal")
         }
       }else if(is.character(e) || is.factor(e)){
         if(any(e != g)){
@@ -103,11 +108,12 @@ normalize <- function(x, m, M){
 }
 DefaultCities.expected <-
   list(list(x=line.df$long, y=line.df$lat,
-            type="scatter", mode="lines",
+            type="scatter", mode="lines", name="borders",
             line=list(dash="solid", color="grey50")),
        with(canada.cities,{
          list(x=long, y=lat, text=name, type="scatter", mode="markers",
-              marker=list(opacity=1/2, color="red",
+              name="cities",
+              marker=list(opacity=1/2, color="red", 
                 size=normalize(pop, 1, 6)))
        }))
 ## TODO: legend for sizes?
@@ -124,6 +130,7 @@ for(L in to.check){
   for(trace.i in seq_along(L$expected)){
     e <- L$exp[[trace.i]]
     g <- generated[[trace.i]]
-    check.named(e, g)
+    check.named(e, g, c(L$name, trace.i))
   }
 }
+
