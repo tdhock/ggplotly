@@ -48,8 +48,7 @@ aes2marker <- c(alpha="opacity",
 marker.defaults <- c(alpha=1,
                      shape="o",
                      pch="o",
-                     colour="black",
-                     size=5)
+                     colour="black")
 #' Convert ggplot2 aes to line parameters.
 aes2line <- c(linetype="dash",
               colour="color",
@@ -396,14 +395,25 @@ layer2list <- function(l, d, ranges){
   }
 
   g$traces <- list()
-  n.groups <- length(unique(g$data$group))
+  group.vars <- c("group", "colour", "fill")
+  group.var <- NULL
+  for(gv in group.vars){
+    if(is.null(group.var)){
+      g.col <- g$data[[gv]]
+      n.groups <- length(unique(g.col))
+      if(n.groups > 1){
+        group.var <- g.col
+      }
+    }
+  }
   group.list <- if(n.groups){
-    split(g$data, g$data$group)
+    split(g$data, group.var)
   }else{
     list(g$data)
   }
   for(group.i in seq_along(group.list)){
     g$traces[[group.i]] <- group2trace(group.list[[group.i]], g$params, g$geom)
+    ##g$traces[[group.i]]$name <- names(group.list)[[group.i]]
   }
   g
 }
@@ -431,7 +441,7 @@ getMarker <- function(df, params, aesConverter, defaults, only=NULL){
       to.write
     }
   }
-  if("size" %in% names(marker)){
+  if(length(marker$size) > 1){
     marker$sizeref <- min(marker$size)
     marker$sizemode <- "area"
   }
