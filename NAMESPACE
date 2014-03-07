@@ -6,3 +6,4 @@ export(toRGB)
 import(ggplot2)
 import(plotly)
 import(plyr)
+

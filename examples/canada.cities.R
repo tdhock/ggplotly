@@ -2,11 +2,14 @@ library(maps)
 
 data(canada.cities)
 
-viz <- ggplot(canada.cities, aes(long, lat))+
+viz0 <- ggplot(canada.cities, aes(long, lat))+
   borders(regions="canada", name="borders")+
   coord_equal()+
-  geom_point(aes(text=name, size=pop), alpha=1/2, name="cities")+
-  ## TODO: legend for sizes?
+  geom_point(aes(text=name, size=pop), colour="red",
+             alpha=1/2, name="cities")
+
+## TODO: legend for sizes?
+viz <- viz0+
   continuous_scale("size","area",palette=function(x){
     scales:::rescale(sqrt(abs(x)), c(2,20), c(0,1))
   })

@@ -43,18 +43,22 @@ aes2marker <- c(alpha="opacity",
                 colour="color",
                 size="size",
                 ##TODO="line", ## line color, size, and dash
-                shape="symbol")
+                shape="symbol",
+                text="text")
 marker.defaults <- c(alpha=1,
                      shape="o",
+                     pch="o",
                      colour="black",
                      size=5)
 #' Convert ggplot2 aes to line parameters.
 aes2line <- c(linetype="dash",
               colour="color",
-              size="width")
-line.defaults <- c(linetype="solid",
-                   colour="black",
-                   size=2)
+              size="width",
+              text="text")
+line.defaults <-
+  list(linetype="solid",
+       colour="black",
+       size=2)
 
 numeric.lty <-
   c("1"="solid",
@@ -96,6 +100,8 @@ lty2dash <- c(numeric.lty, named.lty, coded.lty)
 gg2list <- function(p){
   plist <- list()
   plistextra <- ggplot2::ggplot_build(p)
+  ## NOTE: data from ggplot_build have scales already applied. This
+  ## may be a bad thing for log scales.
   for(sc in plistextra$plot$scales$scales){
     if(sc$scale_name == "manual"){
       plist$scales[[sc$aesthetics]] <- sc$palette(0)
@@ -398,17 +404,19 @@ getMarker <- function(df, params, aesConverter, defaults, only=NULL){
   marker <- list()
   for(name in names(aesConverter)){
     plotly.name <- aesConverter[[name]]
-    take.from <- if(name %in% params){
+    take.from <- if(name %in% names(params)){
       params
     } else if(name %in% names(df)){
       df
     } else {
       defaults
     }
+    take.from <- as.list(take.from)
     to.write <- take.from[[name]]
-    if(is.null(to.write)){
-      stop("undefined marker ", name)
-    }
+    ## if(is.null(to.write)){
+    ##   print(take.from)
+    ##   stop("undefined marker ", name)
+    ## }
     marker[[plotly.name]] <- if(!is.null(only)){
       to.write[only]
     }else{
@@ -426,16 +434,15 @@ getMarker <- function(df, params, aesConverter, defaults, only=NULL){
 ##' @author Toby Dylan Hocking
 group2trace <- function(df, params, geom){
   ## Add plotly type/mode info based on geom type.
-  if(geom == "point"){
+  tr <- if(geom == "point"){
     marker <- getMarker(df, params, aes2marker, marker.defaults)
-    tr <- list(type="scatter",
-               mode="markers",
-               marker=marker)
+    list(type="scatter",
+         mode="markers",
+         marker=marker)
   }else if(geom %in% c("line", "polygon")){
-    marker <- getMarker(df, params, aes2line, line.defaults, 1)
-    tr <- list(type="scatter",
-               mode="lines",
-               line=marker)
+    list(type="scatter",
+         mode="lines",
+         line=getMarker(df, params, aes2line, line.defaults, 1))
   }else{
     stop("group2trace does not support geom ", geom)
   }
