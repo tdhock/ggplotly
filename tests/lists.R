@@ -113,8 +113,7 @@ DefaultCities.expected <-
        with(canada.cities,{
          list(x=long, y=lat, text=name, type="scatter", mode="markers",
               name="cities",
-              marker=list(opacity=1/2, color="red", 
-                size=normalize(pop, 1, 6)))
+              marker=list(opacity=1/2, color="red", size=pop))
        }))
 ## TODO: legend for sizes?
 ##viz <- viz0+

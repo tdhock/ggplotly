@@ -12,7 +12,7 @@ ggplotly <- function(gg, p){
   pargs <- gg2list(gg)
   resp <- do.call(p$plotly, pargs)
   browseURL(resp$url)
-  list(data=pargs, response=resp)
+  invisible(list(data=pargs, response=resp))
 }
 
 #' Convert R pch point codes to plotly "symbol" codes.
@@ -98,6 +98,9 @@ lty2dash <- c(numeric.lty, named.lty, coded.lty)
 #' @return list representing a ggplot.
 #' @export
 gg2list <- function(p){
+  ## Always use identity size scale so that plot.ly gets the real
+  ## units for the size variables.
+  p <- p+scale_size_identity()
   plist <- list()
   plistextra <- ggplot2::ggplot_build(p)
   ## NOTE: data from ggplot_build have scales already applied. This
@@ -424,6 +427,10 @@ getMarker <- function(df, params, aesConverter, defaults, only=NULL){
     }else{
       to.write
     }
+  }
+  if("size" %in% names(marker)){
+    marker$sizeref <- min(marker$size)
+    marker$sizemode <- "area"
   }
   marker
 }
