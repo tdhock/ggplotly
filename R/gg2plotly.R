@@ -104,6 +104,25 @@ gg2list <- function(p){
   ## units for the size variables.
   p <- p+scale_size_identity()
   plist <- list()
+  ## Before building the ggplot, we would like to add aes(name) to
+  ## figure out what the object group is later.
+  for(layer.i in seq_along(p$layers)){
+    a <- c(p$layers[[layer.i]]$mapping, p$mapping)
+    group.vars <- c("colour", "color", "col",
+                    "fill",
+                    "linetype", "lty",
+                    "shape", "pch")
+    group.var <- a$name
+    for(gv in group.vars){
+      if(is.null(group.var)){
+        g.expr <- a[[gv]]
+        if(!is.null(g.expr)){
+          group.var <- g.expr
+        }
+      }
+    }
+    p$layers[[layer.i]]$mapping$name <- group.var
+  }
   plistextra <- ggplot2::ggplot_build(p)
   ## NOTE: data from ggplot_build have scales already applied. This
   ## may be a bad thing for log scales.
@@ -395,26 +414,34 @@ layer2list <- function(l, d, ranges){
   }
 
   g$traces <- list()
-  group.vars <- c("group", "colour", "fill")
+  group.vars <- c("group",
+                  "color", "colour",
+                  "fill") #TODO.
   group.var <- NULL
+  found.groups <- 0
   for(gv in group.vars){
     if(is.null(group.var)){
       g.col <- g$data[[gv]]
       n.groups <- length(unique(g.col))
       if(n.groups > 1){
         group.var <- g.col
+        found.groups <- n.groups
       }
     }
   }
-  group.list <- if(n.groups){
+  group.list <- if(found.groups){
     split(g$data, group.var)
   }else{
     list(g$data)
   }
   for(group.i in seq_along(group.list)){
     group.data <- group.list[[group.i]]
-    g$traces[[group.i]] <- group2trace(group.data, g$params, g$geom)
-    g$traces[[group.i]]$name <- group.data$name[1]
+    tr <- group2trace(group.data, g$params, g$geom)
+    if(is.null(tr$name)){
+      tr$name <- group.data$name
+    }
+    tr$name <- as.character(tr$name[1])
+    g$traces[[group.i]] <- tr
   }
   g
 }

@@ -1,7 +1,10 @@
 library(ggplotly)
-check <- function(gg, expected){
-  m <- match.call()
-  list(ggplot=gg, expected=expected, name = as.character(m$gg))
+check <- function(gg, expected, name=NULL){
+  if(is.null(name)){
+    m <- match.call()
+    name <- as.character(m$gg)
+  }
+  list(ggplot=gg, expected=expected, name=name)
 }
 check.named <- function(expected, generated, trace){
   for(L in list(expected, generated)){
@@ -128,11 +131,39 @@ DefaultCities.expected <-
               name="cities",
               marker=list(opacity=1/2, color="red", size=pop))
        }))
+## different ways to define the iris scatterplot, these should all
+## give the same result.
+iris.plots <-
+  list(global=ggplot(iris,aes(Petal.Width, Sepal.Width, color=Species))+
+       geom_point(),
+       point=ggplot(iris)+
+       geom_point(aes(Petal.Width, Sepal.Width, color=Species)),
+       qplot=qplot(Petal.Width, Sepal.Width, color=Species, data=iris),
+       qplot=qplot(Petal.Width, Sepal.Width, colour=Species, data=iris),
+       qplot=qplot(Petal.Width, Sepal.Width, col=Species, data=iris))
+igroups <- split(iris, iris$Sp)
+iris.expected <- list()
+colors3 <- c("rgb(0,186,56)","rgb(248,118,109)","rgb(97,156,255)")
+inames <- c("versicolor", "setosa", "virginica")
+for(species.i in seq_along(inames)){
+  iname <- inames[[species.i]]
+  sp <- igroups[[iname]]
+  iris.expected[[species.i]] <-
+    list(x=sp$Petal.Width, y=sp$Sepal.Width, name=as.character(sp$Sp[1]),
+         type="scatter", mode="markers",
+         marker=list(color=rep(colors3[[species.i]], nrow(sp))))
+}
 ## Checklist.
 to.check <-
   list(check(AllBlack, AllBlack.expected),
        check(DefaultCities, DefaultCities.expected),
        check(Types, Types.expected))
+## TODO: check.unordered function!
+for(name in names(iris.plots)){
+  full.name <- sprintf("iris.%s", name)
+  to.check[[length(to.check)+1]] <-
+    check(iris.plots[[name]], iris.expected, full.name)
+}
 for(L in to.check){
   generated <- gg2list(L$gg)
   for(trace.i in seq_along(L$expected)){
