@@ -435,7 +435,7 @@ group2trace <- function(df, params, geom){
     marker <- getMarker(df, params, aes2line, line.defaults, 1)
     tr <- list(type="scatter",
                mode="lines",
-               marker=list(line=marker))
+               line=marker)
   }else{
     stop("group2trace does not support geom ", geom)
   }

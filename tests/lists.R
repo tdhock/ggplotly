@@ -55,7 +55,7 @@ expected <- list()
 for(group.i in seq_along(group.list)){
   g <- group.list[[group.i]]
   expected[[group.i]] <- list(x=g$x, y=g$y, type="scatter", mode="lines",
-                              marker=list(line=list(color="black")))
+                              line=list(color="black"))
 }
 to.check <- list(check(AllBlack, expected))
 for(L in to.check){

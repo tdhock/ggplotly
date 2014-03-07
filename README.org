@@ -1,7 +1,7 @@
 * Motivation
 
 A wide variety of plots can be defined in R code using
-library(ggplot2). The [[https://plot.ly][plot.ly]] web app is for interactively sharing
+library(ggplot2). The [[https://plot.ly][plot.ly]] web app is for sharing interactive
 plots, and can be used from R via library(plotly). Now, ggplots can be
 uploaded to plotly using library(ggplotly).
 
