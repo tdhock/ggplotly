@@ -67,6 +67,7 @@ numeric.lty <-
     "4"="dashdot",
     "5"="longdash",
     "6"="longdashdot")
+
 named.lty <-
   c("solid"="solid",
     "blank"="none",
@@ -75,12 +76,14 @@ named.lty <-
     "dotdash"="dashdot",
     "longdash"="longdash",
     "twodash"="dash")
+
+## TODO: does plotly support this??
 coded.lty <-
   c("22"="dash",
-    "42"="dash",
-    "44"="dash",
-    "13"="dot",
-    "1343"="dotdash",
+    "42"="dot",
+    "44"="dashdot",
+    "13"="longdash",
+    "1343"="longdashdot",
     "73"="dash",
     "2262"="dotdash",
     "12223242"="dotdash",
@@ -431,6 +434,9 @@ getMarker <- function(df, params, aesConverter, defaults, only=NULL){
   if("size" %in% names(marker)){
     marker$sizeref <- min(marker$size)
     marker$sizemode <- "area"
+  }
+  if("dash" %in% names(marker)){
+    marker$dash <- lty2dash[[marker$dash]]
   }
   marker
 }

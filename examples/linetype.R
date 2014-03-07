@@ -1,5 +1,4 @@
 library(ggplotly)
-library(ggplot2)
 
 #' Generate data
 set.seed(1)
@@ -33,12 +32,11 @@ ColorsTwoTypes <- ggplot(Groups) +
   ggtitle("geom_line + scale_linetype_manual")
 ggplotly(ColorsTwoTypes, p)
 
-
-#' Use automatic linetypes from ggplot with coerced factors
-Types <- ggplot(Groups) +
+#' Use 6 different linetypes.
+Types <- ggplot(subset(Groups, as.integer(group)<=6)) +
   geom_line(aes(x=x, y=y, colour=group, group=group,linetype=group))+
   ggtitle("geom_line + scale_linetype automatic")
-Types
+ggplotly(Types, p)
 
 #' Use automatic linetypes from ggplot with coerced factors
 makedf <- function(plotly){

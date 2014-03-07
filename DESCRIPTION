@@ -11,4 +11,5 @@ Depends:
     ggplot2,
     plotly,
     plyr
-Suggests: maps
+Suggests:
+    maps

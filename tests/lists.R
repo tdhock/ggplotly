@@ -36,10 +36,7 @@ check.named <- function(expected, generated, trace){
         if(!is.numeric(g)){
           bad()
         }
-        ## a tolerance of 0.001 means that the size calculation with
-        ## the normalize function below will not agree with the
-        ## ggplot2 size calculation.
-        char.if.different <- all.equal(e, g, 0.01)
+        char.if.different <- all.equal(e, g)
         if(is.character(char.if.different)){
           print(rbind(expected=e, generated=g))
           print(char.if.different)
@@ -59,7 +56,8 @@ check.named <- function(expected, generated, trace){
     }
   }
 }
-## Generate data
+
+## Generate lineplot data.
 set.seed(1)
 n.groups <- 20
 Groups <- data.frame(x=rep(1:10, times=n.groups),
@@ -68,8 +66,6 @@ Groups$lt <- c("even", "odd")[(Groups$group%%2+1)] # linetype
 Groups$group <- as.factor(Groups$group)
 Groups$y <- rnorm(length(Groups$x), Groups$x, .5) +
   rep(rnorm(n.groups, 0, 2), each=10)
-
-
 ## Simple black lineplot.
 AllBlack <- ggplot(Groups) +
   geom_line(aes(x=x, y=y, group=group)) + 
@@ -82,6 +78,23 @@ for(group.i in seq_along(group.list)){
     list(x=g$x, y=g$y, type="scatter", mode="lines",
          line=list(color="black"))
 }
+## A ggplot with 6 different automatic types should be converted to
+## plotly's 6 types.
+Types <- ggplot(subset(Groups, as.integer(group)<=6)) +
+  geom_line(aes(x=x, y=y, group=group, linetype=group))+
+  ggtitle("geom_line + scale_linetype automatic")
+Types.expected <- AllBlack.expected[1:6]
+dash <-
+  c("solid",
+    "dash",
+    "dot",
+    "dashdot",
+    "longdash",
+    "longdashdot")
+for(trace.i in seq_along(Types.expected)){
+  Types.expected[[trace.i]]$line$dash <- dash[[trace.i]]
+}
+
 
 ## Canada city population map.
 library(maps)
@@ -115,15 +128,11 @@ DefaultCities.expected <-
               name="cities",
               marker=list(opacity=1/2, color="red", size=pop))
        }))
-## TODO: legend for sizes?
-##viz <- viz0+
-  ## continuous_scale("size","area",palette=function(x){
-  ##   scales:::rescale(sqrt(abs(x)), c(2,20), c(0,1))
-  ## })
-## TODO: construct axes based on ggplot2 scales?
+## Checklist.
 to.check <-
   list(check(AllBlack, AllBlack.expected),
-       check(DefaultCities, DefaultCities.expected))
+       check(DefaultCities, DefaultCities.expected),
+       check(Types, Types.expected))
 for(L in to.check){
   generated <- gg2list(L$gg)
   for(trace.i in seq_along(L$expected)){
