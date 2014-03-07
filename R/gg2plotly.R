@@ -412,8 +412,9 @@ layer2list <- function(l, d, ranges){
     list(g$data)
   }
   for(group.i in seq_along(group.list)){
-    g$traces[[group.i]] <- group2trace(group.list[[group.i]], g$params, g$geom)
-    ##g$traces[[group.i]]$name <- names(group.list)[[group.i]]
+    group.data <- group.list[[group.i]]
+    g$traces[[group.i]] <- group2trace(group.data, g$params, g$geom)
+    g$traces[[group.i]]$name <- group.data$name[1]
   }
   g
 }
