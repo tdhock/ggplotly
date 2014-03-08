@@ -10,6 +10,5 @@ Description: ggplots can be used to define plots in R,
 Depends:
     ggplot2,
     plotly,
-    plyr
-Suggests:
+    plyr,
     maps
