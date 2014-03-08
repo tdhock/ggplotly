@@ -2,8 +2,7 @@
 #' @export
 #' @param gg a ggplot.
 #' @param p a plotly interface object.
-#' @examples examples/ggplotly.R
-
+#' @example examples/ggplotly.R
 ggplotly <- function(gg, p){
   if(!is.ggplot(gg)){
     stop("gg must be a ggplot")

@@ -1,6 +1,6 @@
 if(interactive()){
   if(!"p" %in% ls()){
-    stop("first run\np <- plotly::plotly(username, key)")
+    stop("first create a plotly interface object p:\np <- plotly::plotly(username, key)")
   }
   ggiris <- qplot(Petal.Width, Sepal.Length, data=iris, color=Species)
   ggplotly(ggiris, p)
