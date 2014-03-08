@@ -14,6 +14,16 @@ library(ggplotly)
 example(ggplotly)
 #+END_SRC
 
+The example will give you an error if you have not already created a
+ggplotly interface object:
+
+#+BEGIN_SRC R
+p <- plotly::plotly("YOUR_USERNAME", "YOUR_KEY")
+#+END_SRC
+
+Note that you can put the code above in your =~/.Rprofile= if you want
+to avoid having to type your plotly name/key every session.
+
 * Features
 
 The mission of the ggplotly package is to make it as easy as possible
