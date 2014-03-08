@@ -9,6 +9,7 @@ uploaded to plotly using library(ggplotly).
 install.packages("devtools")
 library(devtools)
 install_github("ggplotly", "tdhock")
+install_github("R-api", "plotly")
 library(ggplotly)
 example(ggplotly)
 #+END_SRC
