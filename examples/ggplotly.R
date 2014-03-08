@@ -4,7 +4,7 @@ if(interactive()){
   }
   ggiris <- qplot(Petal.Width, Sepal.Length, data=iris, color=Species)
   ggplotly(ggiris, p)
-  data(canada.cities)
+  data(canada.cities, package="maps")
   viz <- ggplot(canada.cities, aes(long, lat))+
     borders(regions="canada", name="borders")+
     coord_equal()+
