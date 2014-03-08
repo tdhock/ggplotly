@@ -5,6 +5,10 @@ More oo design: group geom-specific code.
 Doc web site like ipython notebooks.
 http://nbviewer.ipython.org/github/plotly/IPython-plotly/blob/master/See%20more/Multiple%20Axes%2C%20Subplots%2C%20and%20Insets.ipynb
 
+2014.3.7
+
+First ggplotly examples with iris and canada cities.
+
 2014.3.6
 
 Basic documentation.

@@ -12,4 +12,7 @@ ggplotly(gg, p)
 \description{
 Send a ggplot to plot.ly.
 }
+\examples{
+examples/ggplotly.R
+}
 
